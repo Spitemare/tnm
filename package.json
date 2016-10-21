@@ -1,0 +1,28 @@
+{
+  "name": "device",
+  "author": "David Morgan",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "The Device",
+    "uuid": "6cc95993-cfda-4b96-a8ae-fbf6de591553",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+    ],
+    "resources": {
+      "media": []
+    }
+  }
+}
