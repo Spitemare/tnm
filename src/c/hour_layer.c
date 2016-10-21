@@ -52,6 +52,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *th
     log_func();
     Data *data = layer_get_data(this);
     data->hour = tick_time->tm_hour;
+    if (data->hour > 12) data->hour -= 12;
     layer_mark_dirty(this);
 }
 
