@@ -2,9 +2,15 @@
   "name": "device",
   "author": "David Morgan",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "@smallstoneapps/linked-list": "^1.4.0",
+    "pebble-events": "^1.2.0",
+    "pebble-fctx": "^1.6.1"
+  },
   "pebble": {
     "displayName": "The Device",
     "uuid": "6cc95993-cfda-4b96-a8ae-fbf6de591553",
@@ -19,10 +25,18 @@
     "watchapp": {
       "watchface": true
     },
-    "messageKeys": [
-    ],
+    "messageKeys": [],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "raw",
+          "name": "LECO_FFONT",
+          "file": "LECO1976-Regular.ffont"
+        }
+      ]
     }
+  },
+  "devDependencies": {
+    "pebble-fctx-compiler": "^1.2.1"
   }
 }
