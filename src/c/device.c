@@ -2,9 +2,11 @@
 #include "logging.h"
 #include "fonts.h"
 #include "minute_layer.h"
+#include "hour_layer.h"
 
 static Window *s_window;
 static MinuteLayer *s_minute_layer;
+static HourLayer *s_hour_layer;
 
 static void window_load(Window *window) {
     log_func();
@@ -13,10 +15,19 @@ static void window_load(Window *window) {
 
     s_minute_layer = minute_layer_create(bounds);
     layer_add_child(root_layer, s_minute_layer);
+
+#ifdef PBL_PLATFORM_EMERY
+    int32_t crop = 30;
+#else
+    int32_t crop = PBL_IF_RECT_ELSE(22, 28);
+#endif
+    s_hour_layer = hour_layer_create(grect_crop(bounds, crop));
+    layer_add_child(root_layer, s_hour_layer);
 }
 
 static void window_unload(Window *window) {
     log_func();
+    hour_layer_destroy(s_hour_layer);
     minute_layer_destroy(s_minute_layer);
 }
 
