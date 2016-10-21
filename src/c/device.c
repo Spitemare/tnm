@@ -16,12 +16,7 @@ static void window_load(Window *window) {
     s_minute_layer = minute_layer_create(bounds);
     layer_add_child(root_layer, s_minute_layer);
 
-#ifdef PBL_PLATFORM_EMERY
-    int32_t crop = 30;
-#else
-    int32_t crop = PBL_IF_RECT_ELSE(22, 28);
-#endif
-    s_hour_layer = hour_layer_create(grect_crop(bounds, crop));
+    s_hour_layer = hour_layer_create(bounds);
     layer_add_child(root_layer, s_hour_layer);
 }
 

@@ -14,25 +14,19 @@ typedef struct {
 
 static void update_proc(Layer *this, GContext *ctx) {
     log_func();
-    GRect bounds = layer_get_unobstructed_bounds(this);
+    GRect bounds = layer_get_bounds(this);
     Data *data = layer_get_data(this);
     uint8_t hour = data->hour;
 
     FContext fctx;
     fctx_init_context(&fctx, ctx);
 
-#ifdef PBL_PLATFORM_EMERY
-    int16_t font_size = 22;
-#else
-    int16_t font_size = PBL_IF_RECT_ELSE(15, 20);
-#endif
+    int16_t font_size = bounds.size.w / 10;
     fctx_set_text_em_height(&fctx, data->font, font_size);
     fctx_set_color_bias(&fctx, 0);
     fctx_set_fill_color(&fctx, GColorBlack);
 
-    GRect frame = layer_get_frame(this);
-    FPoint offset = g2fpoint(frame.origin);
-
+    GRect rect = grect_crop(bounds, font_size * 1.4);
     for (int i = hour; i < 12 + hour; i ++) {
         fctx_begin_fill(&fctx);
 
@@ -40,8 +34,8 @@ static void update_proc(Layer *this, GContext *ctx) {
         fctx_set_rotation(&fctx, rot_angle);
 
         int32_t point_angle = (i + 15 - hour) * TRIG_MAX_ANGLE / 12;
-        GPoint p = gpoint_from_polar(bounds, GOvalScaleModeFitCircle, point_angle);
-        fctx_set_offset(&fctx, fpoint_add(offset, g2fpoint(p)));
+        GPoint p = gpoint_from_polar(rect, GOvalScaleModeFitCircle, point_angle);
+        fctx_set_offset(&fctx, g2fpoint(p));
 
         char s[3];
         snprintf(s, sizeof(s), "%02d", i > 12 ? i - 12 : i);

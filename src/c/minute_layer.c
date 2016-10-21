@@ -14,25 +14,16 @@ typedef struct {
 
 static void update_proc(Layer *this, GContext *ctx) {
     log_func();
-    GRect bounds = layer_get_unobstructed_bounds(this);
+    GRect bounds = layer_get_bounds(this);
     Data *data = layer_get_data(this);
     uint8_t min = data->min;
 
     FContext fctx;
     fctx_init_context(&fctx, ctx);
 
-#ifdef PBL_PLATFORM_EMERY
-    int16_t font_size = 22;
-#else
-    int16_t font_size = PBL_IF_RECT_ELSE(15, 20);
-#endif
-    fctx_set_text_em_height(&fctx, data->font, font_size);
-
+    fctx_set_text_em_height(&fctx, data->font, bounds.size.w / 10);
     fctx_set_color_bias(&fctx, 0);
     fctx_set_fill_color(&fctx, GColorBlack);
-
-    GRect frame = layer_get_frame(this);
-    FPoint offset = g2fpoint(frame.origin);
 
     for (int i = min; i < 60 + min; i ++) {
         if (i % 5 == 0) {
@@ -43,7 +34,7 @@ static void update_proc(Layer *this, GContext *ctx) {
 
             int32_t point_angle = (i + 15 - min) * TRIG_MAX_ANGLE / 60;
             GPoint p = gpoint_from_polar(bounds, GOvalScaleModeFitCircle, point_angle);
-            fctx_set_offset(&fctx, fpoint_add(offset, g2fpoint(p)));
+            fctx_set_offset(&fctx, g2fpoint(p));
 
             char s[3];
             snprintf(s, sizeof(s), "%02d", i >= 60 ? i - 60 : i);
