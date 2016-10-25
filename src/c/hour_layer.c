@@ -160,7 +160,7 @@ HourLayer *hour_layer_create(GRect frame) {
     int hour = tick_time->tm_hour;
     hour = hour > 12 ? hour - 12 : hour;
     data->value = hour * 5;
-    data->tick_timer_event_handle = events_tick_timer_service_subscribe_context(MINUTE_UNIT, tick_handler, this);
+    data->tick_timer_event_handle = events_tick_timer_service_subscribe_context(HOUR_UNIT, tick_handler, this);
 
     data->tap_event_handle = events_accel_tap_service_subscribe_context(accel_tap_handler, this);
 
