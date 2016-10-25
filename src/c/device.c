@@ -3,10 +3,12 @@
 #include "fonts.h"
 #include "minute_layer.h"
 #include "hour_layer.h"
+#include "battery_layer.h"
 
 static Window *s_window;
 static MinuteLayer *s_minute_layer;
 static HourLayer *s_hour_layer;
+static BatteryLayer *s_battery_layer;
 
 static void window_load(Window *window) {
     log_func();
@@ -18,10 +20,14 @@ static void window_load(Window *window) {
 
     s_hour_layer = hour_layer_create(bounds);
     layer_add_child(root_layer, s_hour_layer);
+
+    s_battery_layer = battery_layer_create(bounds);
+    layer_add_child(root_layer, s_battery_layer);
 }
 
 static void window_unload(Window *window) {
     log_func();
+    battery_layer_destroy(s_battery_layer);
     hour_layer_destroy(s_hour_layer);
     minute_layer_destroy(s_minute_layer);
 }
