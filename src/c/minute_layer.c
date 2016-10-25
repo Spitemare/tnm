@@ -6,17 +6,21 @@
 #include "fonts.h"
 #include "minute_layer.h"
 
+static const uint32_t TAP_TIMEOUT = 3000; // 3 seconds
+
 typedef struct {
     FFont *font;
-    uint8_t min;
+    uint8_t value;
+    bool animated;
     EventHandle tick_timer_event_handle;
+    EventHandle tap_event_handle;
 } Data;
 
 static void update_proc(Layer *this, GContext *ctx) {
     log_func();
     GRect bounds = layer_get_bounds(this);
     Data *data = layer_get_data(this);
-    uint8_t min = data->min;
+    uint8_t min = data->value;
 
     FContext fctx;
     fctx_init_context(&fctx, ctx);
@@ -51,8 +55,83 @@ static void update_proc(Layer *this, GContext *ctx) {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *this) {
     log_func();
     Data *data = layer_get_data(this);
-    data->min = tick_time->tm_min;
+    data->value = tick_time->tm_min;
     layer_mark_dirty(this);
+}
+
+static void value_setter(void *subject, int16_t value) {
+    log_func();
+    logd("%d", value);
+    ((Data *) layer_get_data(subject))->value = value;
+    layer_mark_dirty(subject);
+}
+
+static int16_t value_getter(void *subject) {
+    log_func();
+    return ((Data *) layer_get_data(subject))->value;
+}
+
+
+static const PropertyAnimationImplementation animation_impl = {
+    .base = {
+        .update = (AnimationUpdateImplementation)  property_animation_update_int16
+    },
+    .accessors = {
+        .setter = { .int16 = value_setter },
+        .getter = { .int16 = value_getter }
+    }
+};
+
+static void timer_callback(void *context) {
+    log_func();
+    time_t now = time(NULL);
+    struct tm *tick_time = localtime(&now);
+    static int16_t to;
+    memcpy(&to, &tick_time->tm_min, sizeof(int16_t));
+
+    PropertyAnimation *animation = property_animation_create(&animation_impl, context, NULL, NULL);
+    property_animation_set_to_int16(animation, &to);
+    animation_schedule(property_animation_get_animation(animation));
+
+    Data *data = layer_get_data(context);
+    data->animated = false;
+}
+
+static void animation_stopped_handler(Animation *animation, bool finished, void *context) {
+    log_func();
+    app_timer_register(TAP_TIMEOUT, timer_callback, context);
+}
+
+static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *context) {
+    log_func();
+    Data *data = layer_get_data(context);
+    if (!data->animated) {
+        static int16_t from = 0;
+        static int16_t to = 60;
+        PropertyAnimation *a1 = property_animation_create(&animation_impl, context, NULL, NULL);
+        property_animation_set_to_int16(a1, &to);
+
+        PropertyAnimation *a2 = property_animation_clone(a1);
+        property_animation_set_from_int16(a1, &from);
+        animation_set_play_count(property_animation_get_animation(a2), 2);
+
+        time_t now = time(NULL);
+        struct tm *tick_time = localtime(&now);
+        static int16_t mday;
+        memcpy(&mday, &tick_time->tm_mday, sizeof(int16_t));
+        PropertyAnimation *a3 = property_animation_clone(a1);
+        property_animation_set_to_int16(a3, &mday);
+        animation_set_handlers(property_animation_get_animation(a3), (AnimationHandlers) {
+            .stopped = animation_stopped_handler
+        }, context);
+
+        Animation *animation = animation_sequence_create(
+            property_animation_get_animation(a1),
+            property_animation_get_animation(a2),
+            property_animation_get_animation(a3),
+            NULL);
+        animation_schedule(animation);
+    }
 }
 
 MinuteLayer *minute_layer_create(GRect frame) {
@@ -68,12 +147,15 @@ MinuteLayer *minute_layer_create(GRect frame) {
     tick_handler(tick_time, MINUTE_UNIT, this);
     data->tick_timer_event_handle = events_tick_timer_service_subscribe_context(MINUTE_UNIT, tick_handler, this);
 
+    data->tap_event_handle = events_accel_tap_service_subscribe_context(accel_tap_handler, this);
+
     return this;
 }
 
 void minute_layer_destroy(MinuteLayer *this) {
     log_func();
     Data *data = layer_get_data(this);
+    events_accel_tap_service_unsubscribe(data->tap_event_handle);
     events_tick_timer_service_unsubscribe(data->tick_timer_event_handle);
     layer_destroy(this);
 }
