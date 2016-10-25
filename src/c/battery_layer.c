@@ -28,6 +28,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     fctx_set_color_bias(&fctx, 0);
     fctx_set_fill_color(&fctx, GColorBlack);
 
+    FPoint offset = FPointI(PBL_IF_RECT_ELSE(-2.1 * font_size, 0), 0);
     GRect rect = grect_crop(bounds, font_size * PBL_IF_ROUND_ELSE(4.6, 3.8));
     for (int i = bat; i < 100 + bat; i++) {
         fctx_begin_fill(&fctx);
@@ -36,8 +37,9 @@ static void update_proc(Layer *this, GContext *ctx) {
         fctx_set_rotation(&fctx, rot_angle);
 
         int32_t point_angle = (i - 25 - bat) * TRIG_MAX_ANGLE / 100;
-        GPoint p = gpoint_from_polar(rect, GOvalScaleModeFitCircle, point_angle);
-        fctx_set_offset(&fctx, g2fpoint(p));
+        GPoint p = gpoint_from_polar(rect, PBL_IF_RECT_ELSE(GOvalScaleModeFillCircle, GOvalScaleModeFitCircle), point_angle);
+        fctx_set_offset(&fctx, fpoint_add(offset, g2fpoint(p)));
+
         if (i % 10 == 0) {
             char s[4];
             fctx_set_text_em_height(&fctx, data->font, font_size);

@@ -14,6 +14,10 @@ static void window_load(Window *window) {
     log_func();
     Layer *root_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(root_layer);
+#ifdef PBL_RECT
+    int16_t diff = bounds.size.h - bounds.size.w;
+    bounds = GRect(bounds.origin.x - diff, bounds.origin.y, bounds.size.w + diff, bounds.size.h);
+#endif
 
     s_minute_layer = minute_layer_create(bounds);
     layer_add_child(root_layer, s_minute_layer);
