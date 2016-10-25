@@ -10,7 +10,7 @@ static const uint32_t TAP_TIMEOUT = 3000; // 3 seconds
 
 typedef struct {
     FFont *font;
-    uint8_t value;
+    int8_t value;
     bool animated;
     EventHandle tick_timer_event_handle;
     EventHandle tap_event_handle;
@@ -20,7 +20,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     log_func();
     GRect bounds = layer_get_bounds(this);
     Data *data = layer_get_data(this);
-    uint8_t min = data->value;
+    int8_t min = data->value;
 
     FContext fctx;
     fctx_init_context(&fctx, ctx);
@@ -55,13 +55,14 @@ static void update_proc(Layer *this, GContext *ctx) {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *this) {
     log_func();
     Data *data = layer_get_data(this);
-    data->value = tick_time->tm_min;
-    layer_mark_dirty(this);
+    if (!data->animated) {
+        data->value = tick_time->tm_min;
+        layer_mark_dirty(this);
+    }
 }
 
 static void value_setter(void *subject, int16_t value) {
     log_func();
-    logd("%d", value);
     ((Data *) layer_get_data(subject))->value = value;
     layer_mark_dirty(subject);
 }

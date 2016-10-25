@@ -10,7 +10,7 @@ static const uint32_t TAP_TIMEOUT = 3000; // 3 seconds
 
 typedef struct {
     FFont *font;
-    uint8_t value;
+    int8_t value;
     bool animated;
     EventHandle tick_timer_event_handle;
     EventHandle tap_event_handle;
@@ -20,7 +20,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     log_func();
     GRect bounds = layer_get_bounds(this);
     Data *data = layer_get_data(this);
-    uint8_t hour = data->value;
+    int8_t hour = data->value * 5;
 
     FContext fctx;
     fctx_init_context(&fctx, ctx);
@@ -31,38 +31,32 @@ static void update_proc(Layer *this, GContext *ctx) {
     fctx_set_fill_color(&fctx, GColorBlack);
 
     GRect rect = grect_crop(bounds, font_size * 1.4);
-    for (int i = hour; i < 12 + hour; i ++) {
-        fctx_begin_fill(&fctx);
+    for (int i = hour; i < 60 + hour; i ++) {
+        if (i % 5 == 0) {
+            fctx_begin_fill(&fctx);
 
-        int32_t rot_angle = (i - hour) * TRIG_MAX_ANGLE / 12;
-        fctx_set_rotation(&fctx, rot_angle);
+            int32_t rot_angle = (i - hour) * TRIG_MAX_ANGLE / 60;
+            fctx_set_rotation(&fctx, rot_angle);
 
-        int32_t point_angle = (i + 15 - hour) * TRIG_MAX_ANGLE / 12;
-        GPoint p = gpoint_from_polar(rect, GOvalScaleModeFitCircle, point_angle);
-        fctx_set_offset(&fctx, g2fpoint(p));
+            int32_t point_angle = (i + 15 - hour) * TRIG_MAX_ANGLE / 60;
+            GPoint p = gpoint_from_polar(rect, GOvalScaleModeFitCircle, point_angle);
+            fctx_set_offset(&fctx, g2fpoint(p));
 
-        char s[3];
-        snprintf(s, sizeof(s), "%02d", i > 12 ? i - 12 : i);
-        fctx_draw_string(&fctx, s, data->font, GTextAlignmentRight, FTextAnchorMiddle);
+            char s[3];
+            int j = i / 5;
+            snprintf(s, sizeof(s), "%02d", j > 12 ? j - 12 : j);
+            fctx_draw_string(&fctx, s, data->font, GTextAlignmentRight, FTextAnchorMiddle);
 
-        fctx_end_fill(&fctx);
+            fctx_end_fill(&fctx);
+        }
         fctx_set_fill_color(&fctx, GColorDarkGray);
     }
 
     fctx_deinit_context(&fctx);
 }
 
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *this) {
-    log_func();
-    Data *data = layer_get_data(this);
-    data->value = tick_time->tm_hour;
-    if (data->value > 12) data->value -= 12;
-    layer_mark_dirty(this);
-}
-
 static void value_setter(void *subject, int16_t value) {
     log_func();
-    logd("%d", value);
     ((Data *) layer_get_data(subject))->value = value;
     layer_mark_dirty(subject);
 }
@@ -108,7 +102,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
     Data *data = layer_get_data(context);
     if (!data->animated) {
         static int16_t from = 0;
-        static int16_t to = 12;
+        static int16_t to = 60;
         PropertyAnimation *a1 = property_animation_create(&animation_impl, context, NULL, NULL);
         property_animation_set_to_int16(a1, &to);
 
@@ -119,7 +113,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
         time_t now = time(NULL);
         struct tm *tick_time = localtime(&now);
         static int16_t mon;
-        memcpy(&mon, &tick_time->tm_mon, sizeof(int16_t));
+        memcpy(&mon, &tick_time->tm_mon, sizeof(int));
         mon += 1;
         PropertyAnimation *a3 = property_animation_clone(a1);
         property_animation_set_to_int16(a3, &mon);
@@ -133,6 +127,19 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
             property_animation_get_animation(a3),
             NULL);
         animation_schedule(animation);
+    }
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *context) {
+    log_func();
+    Data *data = layer_get_data(context);
+    if (!data->animated) {
+        static int16_t to;
+        memcpy(&to, &tick_time->tm_hour, sizeof(int));
+
+        PropertyAnimation *animation = property_animation_create(&animation_impl, context, NULL, NULL);
+        property_animation_set_to_int16(animation, &to);
+        animation_schedule(property_animation_get_animation(animation));
     }
 }
 
