@@ -116,7 +116,6 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
 
         PropertyAnimation *a2 = property_animation_clone(a1);
         property_animation_set_from_int16(a1, &from);
-        animation_set_play_count(property_animation_get_animation(a2), 2);
 
         time_t now = time(NULL);
         struct tm *tick_time = localtime(&now);
