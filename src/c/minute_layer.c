@@ -25,27 +25,29 @@ static void update_proc(Layer *this, GContext *ctx) {
     FContext fctx;
     fctx_init_context(&fctx, ctx);
 
-    fctx_set_text_em_height(&fctx, data->font, bounds.size.w / 10);
+    int16_t font_size = bounds.size.w / 10;
     fctx_set_color_bias(&fctx, 0);
     fctx_set_fill_color(&fctx, GColorBlack);
 
-    for (int i = min; i < 60 + min; i ++) {
+    for (int i = min; i < 60 + min; i++) {
+        fctx_begin_fill(&fctx);
+
+        int32_t rot_angle = (i - min) * TRIG_MAX_ANGLE / 60;
+        fctx_set_rotation(&fctx, rot_angle);
+
+        int32_t point_angle = (i + 15 - min) * TRIG_MAX_ANGLE / 60;
+        GPoint p = gpoint_from_polar(bounds, GOvalScaleModeFitCircle, point_angle);
+        fctx_set_offset(&fctx, g2fpoint(p));
         if (i % 5 == 0) {
-            fctx_begin_fill(&fctx);
-
-            int32_t rot_angle = (i - min) * TRIG_MAX_ANGLE / 60;
-            fctx_set_rotation(&fctx, rot_angle);
-
-            int32_t point_angle = (i + 15 - min) * TRIG_MAX_ANGLE / 60;
-            GPoint p = gpoint_from_polar(bounds, GOvalScaleModeFitCircle, point_angle);
-            fctx_set_offset(&fctx, g2fpoint(p));
-
             char s[3];
+            fctx_set_text_em_height(&fctx, data->font, font_size);
             snprintf(s, sizeof(s), "%02d", i >= 60 ? i - 60 : i);
             fctx_draw_string(&fctx, s, data->font, GTextAlignmentRight, FTextAnchorMiddle);
-
-            fctx_end_fill(&fctx);
+        } else {
+            fctx_set_text_em_height(&fctx, data->font, font_size - 4);
+            fctx_draw_string(&fctx, "-", data->font, GTextAlignmentRight, FTextAnchorMiddle);
         }
+        fctx_end_fill(&fctx);
         fctx_set_fill_color(&fctx, GColorDarkGray);
     }
 
