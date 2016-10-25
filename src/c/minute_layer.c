@@ -43,7 +43,7 @@ static void update_proc(Layer *this, GContext *ctx) {
         if (i % 5 == 0) {
             char s[3];
             fctx_set_text_em_height(&fctx, data->font, font_size);
-            snprintf(s, sizeof(s), "%02d", i <= 0 ? i + 60 : i);
+            snprintf(s, sizeof(s), "%02d", i < 0 ? i + 60 : i);
             fctx_draw_string(&fctx, s, data->font, GTextAlignmentRight, FTextAnchorMiddle);
         } else {
             fctx_set_text_em_height(&fctx, data->font, font_size - 4);
