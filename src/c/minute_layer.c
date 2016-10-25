@@ -109,28 +109,23 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
     log_func();
     Data *data = layer_get_data(context);
     if (!data->animated) {
-        static int16_t from = 0;
         static int16_t to = 60;
         PropertyAnimation *a1 = property_animation_create(&animation_impl, context, NULL, NULL);
         property_animation_set_to_int16(a1, &to);
-
-        PropertyAnimation *a2 = property_animation_clone(a1);
-        property_animation_set_from_int16(a1, &from);
 
         time_t now = time(NULL);
         struct tm *tick_time = localtime(&now);
         static int16_t mday;
         memcpy(&mday, &tick_time->tm_mday, sizeof(int16_t));
-        PropertyAnimation *a3 = property_animation_clone(a1);
-        property_animation_set_to_int16(a3, &mday);
-        animation_set_handlers(property_animation_get_animation(a3), (AnimationHandlers) {
+        PropertyAnimation *a2 = property_animation_clone(a1);
+        property_animation_set_to_int16(a2, &mday);
+        animation_set_handlers(property_animation_get_animation(a2), (AnimationHandlers) {
             .stopped = animation_stopped_handler
         }, context);
 
         Animation *animation = animation_sequence_create(
             property_animation_get_animation(a1),
             property_animation_get_animation(a2),
-            property_animation_get_animation(a3),
             NULL);
         animation_schedule(animation);
         data->animated = true;
