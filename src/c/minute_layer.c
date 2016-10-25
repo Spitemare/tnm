@@ -29,7 +29,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     fctx_set_color_bias(&fctx, 0);
     fctx_set_fill_color(&fctx, GColorBlack);
 
-    for (int i = min; i < 60 + min; i++) {
+    for (int i = min; i > min - 60; i--) {
         fctx_begin_fill(&fctx);
 
         int32_t rot_angle = (i - min) * TRIG_MAX_ANGLE / 60;
@@ -41,7 +41,7 @@ static void update_proc(Layer *this, GContext *ctx) {
         if (i % 5 == 0) {
             char s[3];
             fctx_set_text_em_height(&fctx, data->font, font_size);
-            snprintf(s, sizeof(s), "%02d", i >= 60 ? i - 60 : i);
+            snprintf(s, sizeof(s), "%02d", i <= 0 ? i + 60 : i);
             fctx_draw_string(&fctx, s, data->font, GTextAlignmentRight, FTextAnchorMiddle);
         } else {
             fctx_set_text_em_height(&fctx, data->font, font_size - 4);
@@ -90,7 +90,7 @@ static void timer_callback(void *context) {
     time_t now = time(NULL);
     struct tm *tick_time = localtime(&now);
     static int16_t to;
-    memcpy(&to, &tick_time->tm_min, sizeof(int16_t));
+    memcpy(&to, &tick_time->tm_min, sizeof(int));
 
     PropertyAnimation *animation = property_animation_create(&animation_impl, context, NULL, NULL);
     property_animation_set_to_int16(animation, &to);
@@ -133,6 +133,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
             property_animation_get_animation(a3),
             NULL);
         animation_schedule(animation);
+        data->animated = true;
     }
 }
 

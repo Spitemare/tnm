@@ -31,7 +31,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     fctx_set_fill_color(&fctx, GColorBlack);
 
     GRect rect = grect_crop(bounds, font_size * 1.4);
-    for (int i = hour; i < 60 + hour; i ++) {
+    for (int i = hour; i > hour - 60; i--) {
         if (i % 5 == 0) {
             fctx_begin_fill(&fctx);
 
@@ -43,8 +43,8 @@ static void update_proc(Layer *this, GContext *ctx) {
             fctx_set_offset(&fctx, g2fpoint(p));
 
             char s[3];
-            int j = i / 5;
-            snprintf(s, sizeof(s), "%02d", j > 12 ? j - 12 : j);
+            int j = i <= 0 ? i + 60 : i;
+            snprintf(s, sizeof(s), "%02d", j / 5);
             fctx_draw_string(&fctx, s, data->font, GTextAlignmentRight, FTextAnchorMiddle);
 
             fctx_end_fill(&fctx);
@@ -82,7 +82,8 @@ static void timer_callback(void *context) {
     time_t now = time(NULL);
     struct tm *tick_time = localtime(&now);
     static int16_t to;
-    memcpy(&to, &tick_time->tm_hour, sizeof(int16_t));
+    memcpy(&to, &tick_time->tm_hour, sizeof(int));
+    to = to > 12 ? to - 12 : to;
     to *= 5;
 
     PropertyAnimation *animation = property_animation_create(&animation_impl, context, NULL, NULL);
@@ -128,6 +129,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction, void *conte
             property_animation_get_animation(a3),
             NULL);
         animation_schedule(animation);
+        data->animated = true;
     }
 }
 
@@ -139,6 +141,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *co
         memcpy(&from, &data->value, sizeof(int8_t));
         static int16_t to;
         memcpy(&to, &tick_time->tm_hour, sizeof(int));
+        to = to > 12 ? to - 12 : to;
         to *= 5;
 
         PropertyAnimation *animation = property_animation_create(&animation_impl, context, NULL, NULL);
@@ -158,8 +161,10 @@ HourLayer *hour_layer_create(GRect frame) {
 
     time_t now = time(NULL);
     struct tm *tick_time = localtime(&now);
-    data->value = tick_time->tm_hour * 5;
-    data->tick_timer_event_handle = events_tick_timer_service_subscribe_context(HOUR_UNIT, tick_handler, this);
+    int hour = tick_time->tm_hour;
+    hour = hour > 12 ? hour - 12 : hour;
+    data->value = hour * 5;
+    data->tick_timer_event_handle = events_tick_timer_service_subscribe_context(MINUTE_UNIT, tick_handler, this);
 
     data->tap_event_handle = events_accel_tap_service_subscribe_context(accel_tap_handler, this);
 
