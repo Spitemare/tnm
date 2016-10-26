@@ -4,6 +4,7 @@
 #include <pebble-events/pebble-events.h>
 #include "logging.h"
 #include "fonts.h"
+#include "colors.h"
 #include "hour_layer.h"
 
 static const uint32_t TAP_TIMEOUT = 3000; // 3 seconds
@@ -28,7 +29,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     int16_t font_size = bounds.size.w / 10;
     fctx_set_text_em_height(&fctx, data->font, font_size);
     fctx_set_color_bias(&fctx, 0);
-    fctx_set_fill_color(&fctx, GColorBlack);
+    fctx_set_fill_color(&fctx, get_foreground_color());
 
     FPoint offset = FPointI(PBL_IF_RECT_ELSE(-1.5 * font_size, 0), 0);
     GRect rect = grect_crop(bounds, font_size * 1.4);
@@ -50,7 +51,11 @@ static void update_proc(Layer *this, GContext *ctx) {
 
             fctx_end_fill(&fctx);
         }
+#ifdef PBL_COLOR
+        fctx_set_color_bias(&fctx, -3);
+#else
         fctx_set_fill_color(&fctx, GColorDarkGray);
+#endif
     }
 
     fctx_deinit_context(&fctx);

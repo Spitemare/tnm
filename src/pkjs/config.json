@@ -9,6 +9,22 @@
                 "defaultValue": true
             },
             {
+                "type": "color",
+                "messageKey": "COLOR_BACKGROUND",
+                "label": "Background",
+                "defaultValue": "000000",
+                "sunlight": false,
+                "capabilities": [ "COLOR" ]
+            },
+            {
+                "type": "toggle",
+                "messageKey": "COLOR_INVERT",
+                "label": "Invert Colors",
+                "description": "White on black, or black on white",
+                "defaultValue": false,
+                "capabilities": [ "BW" ]
+            },
+            {
                 "type": "radiogroup",
                 "messageKey": "CONNECTION_VIBE",
                 "label": "Bluetooth Vibrate",

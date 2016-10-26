@@ -5,6 +5,7 @@
 #include "logging.h"
 #include "fonts.h"
 #include "enamel.h"
+#include "colors.h"
 #include "minute_layer.h"
 #include "hour_layer.h"
 #include "battery_layer.h"
@@ -18,6 +19,7 @@ static EventHandle s_settings_event_handle;
 
 static void settings_handler(void *context) {
     log_func();
+    window_set_background_color(s_window, get_background_color());
     connection_vibes_set_state(atoi(enamel_get_CONNECTION_VIBE()));
     hourly_vibes_set_enabled(enamel_get_HOURLY_VIBE());
 #ifdef PBL_HEALTH

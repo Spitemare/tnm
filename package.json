@@ -32,7 +32,9 @@
     "messageKeys": [
       "CONNECTION_VIBE",
       "HOURLY_VIBE",
-      "ENABLE_HEALTH"
+      "ENABLE_HEALTH",
+      "COLOR_BACKGROUND",
+      "COLOR_INVERT"
     ],
     "resources": {
       "media": [
