@@ -8,8 +8,11 @@
   "private": true,
   "dependencies": {
     "@smallstoneapps/linked-list": "^1.4.0",
+    "enamel": "^1.2.4",
+    "pebble-connection-vibes": "^1.0.2",
     "pebble-events": "^1.2.0",
-    "pebble-fctx": "^1.6.1"
+    "pebble-fctx": "^1.6.1",
+    "pebble-hourly-vibes": "^1.0.2"
   },
   "pebble": {
     "displayName": "The Device",
@@ -26,7 +29,11 @@
     "watchapp": {
       "watchface": true
     },
-    "messageKeys": [],
+    "messageKeys": [
+      "CONNECTION_VIBE",
+      "HOURLY_VIBE",
+      "ENABLE_HEALTH"
+    ],
     "resources": {
       "media": [
         {
