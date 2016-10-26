@@ -29,7 +29,7 @@ static void update_proc(Layer *this, GContext *ctx) {
     fctx_set_color_bias(&fctx, 0);
     fctx_set_fill_color(&fctx, get_foreground_color());
 
-    FPoint offset = FPointI(PBL_IF_RECT_ELSE(-2.1 * font_size, 0), 0);
+    FPoint offset = FPointI(PBL_IF_RECT_ELSE(-1.9 * font_size, 0), 0);
     GRect rect = grect_crop(bounds, font_size * PBL_IF_ROUND_ELSE(4.6, 3.8));
     for (int i = bat; i < 100 + bat; i++) {
         fctx_begin_fill(&fctx);
