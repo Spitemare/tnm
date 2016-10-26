@@ -1,5 +1,5 @@
 {
-  "name": "device",
+  "name": "tnm",
   "author": "David Morgan",
   "version": "1.0.0",
   "keywords": [
@@ -15,7 +15,7 @@
     "pebble-hourly-vibes": "^1.0.2"
   },
   "pebble": {
-    "displayName": "The Device",
+    "displayName": "That's No Moon",
     "uuid": "6cc95993-cfda-4b96-a8ae-fbf6de591553",
     "sdkVersion": "3",
     "enableMultiJS": true,
