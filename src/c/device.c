@@ -16,6 +16,7 @@ static HourLayer *s_hour_layer;
 static BatteryLayer *s_battery_layer;
 
 static EventHandle s_settings_event_handle;
+static EventHandle s_connection_event_handle;
 
 static void settings_handler(void *context) {
     log_func();
@@ -26,6 +27,11 @@ static void settings_handler(void *context) {
     connection_vibes_enable_health(enamel_get_ENABLE_HEALTH());
     hourly_vibes_enable_health(enamel_get_ENABLE_HEALTH());
 #endif
+}
+
+static void connection_handler(bool connected, void *context) {
+    log_func();
+    layer_mark_dirty(context);
 }
 
 static void window_load(Window *window) {
@@ -48,10 +54,15 @@ static void window_load(Window *window) {
 
     settings_handler(NULL);
     s_settings_event_handle = enamel_settings_received_subscribe(settings_handler, NULL);
+
+    s_connection_event_handle = events_connection_service_subscribe_context((EventConnectionHandlers) {
+        .pebble_app_connection_handler = connection_handler
+    }, root_layer);
 }
 
 static void window_unload(Window *window) {
     log_func();
+    events_connection_service_unsubscribe(s_connection_event_handle);
     enamel_settings_received_unsubscribe(s_settings_event_handle);
 
     battery_layer_destroy(s_battery_layer);
@@ -70,6 +81,7 @@ static void init(void) {
         .durations = pattern,
         .num_segments = 1
     });
+    colors_init();
 
     events_app_message_open();
 
@@ -85,6 +97,7 @@ static void deinit(void) {
     log_func();
     window_destroy(s_window);
 
+    colors_deinit();
     hourly_vibes_deinit();
     connection_vibes_deinit();
     fonts_deinit();
