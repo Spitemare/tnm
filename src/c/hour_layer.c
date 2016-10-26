@@ -89,6 +89,9 @@ static void timer_callback(void *context) {
     struct tm *tick_time = localtime(&now);
     static int16_t to;
     memcpy(&to, &tick_time->tm_hour, sizeof(int));
+#ifdef DEMO
+        to = 12;
+#endif
     to = to > 12 ? to - 12 : to;
     to *= 5;
 
@@ -142,6 +145,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *co
         memcpy(&from, &data->value, sizeof(int8_t));
         static int16_t to;
         memcpy(&to, &tick_time->tm_hour, sizeof(int));
+#ifdef DEMO
+        to = 12;
+#endif
         to = to > 12 ? to - 12 : to;
         to *= 5;
 
@@ -163,6 +169,9 @@ HourLayer *hour_layer_create(GRect frame) {
     time_t now = time(NULL);
     struct tm *tick_time = localtime(&now);
     int hour = tick_time->tm_hour;
+#ifdef DEMO
+    hour = 12;
+#endif
     hour = hour > 12 ? hour - 12 : hour;
     data->value = hour * 5;
     data->tick_timer_event_handle = events_tick_timer_service_subscribe_context(HOUR_UNIT, tick_handler, this);

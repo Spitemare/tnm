@@ -66,6 +66,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed, void *th
     Data *data = layer_get_data(this);
     if (!data->animated) {
         data->value = tick_time->tm_min;
+#ifdef DEMO
+        data->value = 30;
+#endif
         layer_mark_dirty(this);
     }
 }
@@ -98,6 +101,9 @@ static void timer_callback(void *context) {
     struct tm *tick_time = localtime(&now);
     static int16_t to;
     memcpy(&to, &tick_time->tm_min, sizeof(int));
+#ifdef DEMO
+    to = 30;
+#endif
 
     PropertyAnimation *animation = property_animation_create(&animation_impl, context, NULL, NULL);
     property_animation_set_to_int16(animation, &to);
